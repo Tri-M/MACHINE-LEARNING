@@ -18,6 +18,10 @@ for i in data.columns:
         kurt = data[i].kurt()
         
 
-
-        print("\nMean:", mean, "\nMedian:",median,"\nStandard Deviation:",std,"\nSkewness:",skew,"\nKurtosis:",kurt)
+        print("The mean is ",mean)
+        print("\nThe median is ",median)
+        print("\nThe standard deviation is ",std)
+        print("\nThe mode is ",mode)
+        print("\nThe skewness is ",skew)
+        print("\nThe kurtosis is ",kurt)
         
