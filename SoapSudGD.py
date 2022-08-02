@@ -47,7 +47,9 @@ def main():
     print("______________________________")
     [b,m]=batchGD(data_points, b_initial, m_initial, eta, iterations)
     end_cost=cost(b,m,data_points)
-    print(f"\ngradient descent for {iterations} iterations we got  y 'intercept' = {b},'slope'={m} ,'ending cost' ={end_cost}")
+    
+    print(f"\nEnding gradient descent for {iterations} iterations we got  y 'intercept' = {b},'slope'={m} ,'ending cost' ={end_cost}")
+    print("______________________________")
     return b,m
 
 if __name__ == "__main__":
@@ -57,4 +59,4 @@ if __name__ == "__main__":
 
         
         
-  
+        
