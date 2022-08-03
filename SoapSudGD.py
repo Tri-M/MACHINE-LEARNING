@@ -1,61 +1,104 @@
+import matplotlib.pyplot as plt
 import numpy as np
+x=soap=[4, 4.5, 5, 5.5, 6, 6.5, 7]
+y=Y=sud=[33, 42, 45, 51, 53, 61, 62]
 
-def cost(b,m,data_points):
-    r_sq=0
-    
-    for i in range(len(data_points)):
-        x=data_points[i,0]
-        y=data_points[i,1]
-        
-        r_sq+=(y-(m*x+b))**2
-    return r_sq/(2*float(len(data_points)))
+# p=plt.scatter(soap,sud)
+ax = plt.axes(projection='3d')
 
-def stepGradient(b,m,data_points,eta):
-    m_grad=0
-    b_grad=0
-    N=float(len(data_points))
-    
-    for i in range(len(data_points)):
-        x=data_points[i,0]
-        y=data_points[i,1]
-        b_grad+=-(1/N)*(y-((m*x+b)))
-        m_grad+=-(1/N)*(x*(y-((m*x)+b)))
-        b_new=b-(eta*b_grad)
-        m_new=m-(eta*m_grad)
-    return [b_new,m_new]
+ct=0
+b0=0
+b1=0
+s1=0
+s2=0
+b0_new=0
+b1_new=0
+eta=0.001
+while True:
+    s1=0
+    s2=0
+   
+    for i in range(7):
+        s1+=(y[i]-(b0+b1*x[i]))
+        s2+=(x[i]*(y[i]-(b0+b1*x[i])))
+    b0_new=b0+eta*s1
+    b1_new=b1+eta*s2
+    if(b0==b0_new and b1==b1_new):
+        print(ct)
+        break
+    b0=b0_new
+    b1=b1_new
+   
+   
+   
+    print(f"{b0_new}\t{b1_new}")
+    ct+=1
 
-def batchGD(data_points,b_initial,m_initial,eta,iterations):
-    b=b_initial
-    m=m_initial
-    for i in range(iterations):
-        b,m=stepGradient(b, m, np.array(data_points), eta)
-    return [b,m]
+print('slope ',b1_new)
+print('intercept',b0_new)
 
-def y_predicted(x):
-    b,m=main()
-    y_pred=m*x+b
-    print(f"\nThe regression predictor of x ={x} is y={y_pred}")
 
-def main():
-    data_points=np.genfromtxt("soap.csv",delimiter=",")
-    eta=0.1
-    m_initial=0
-    b_initial=0
-    iterations=100
-    initial_cost=cost(b_initial,m_initial,data_points)
-    print(f"\nStaring gradient descent at y 'intercept' = {b_initial},'slope'={m_initial} , 'starting cost' ={initial_cost}")
-    print("______________________________")
-    [b,m]=batchGD(data_points, b_initial, m_initial, eta, iterations)
-    end_cost=cost(b,m,data_points)
-    print(f"\nEnding gradient descent for {iterations} iterations we got  y 'intercept' = {b},'slope'={m} ,'ending cost' ={end_cost}")
-    print("______________________________")
-    return b,m
+x = np.linspace(0,len(soap))
+y = b0_new+b1_new*x
+# plt.plot(x, y, '-0')
 
-if __name__ == "__main__":
-    y_predicted(5)
-        
-    
+Xt=[[1, 1, 1, 1, 1, 1, 1],soap]
+print(Xt)
 
-        
-        
-        
+print("\nX Transpose: ")
+X=np.transpose(Xt)
+print(X)
+
+
+print("\nX Transpose X: ")
+XtX=np.dot(Xt,X)
+print(XtX)
+
+
+print("\nX Transpose X Inverse: ")
+XtXi=np.linalg.inv(XtX)
+print(XtXi)
+
+
+print("\nX Transpose Y")
+XtY=np.dot(Xt,Y)
+print(XtY)
+
+
+print("\nB matrix b0 b1")
+B=np.dot(XtXi,XtY)
+print(B)
+
+print("\nLinear equation of the model: ")
+if (B[0]<0):
+    print("y="+str(B[1])+"x"+str(B[0]))
+else:
+    print("y="+str(B[1])+"x+"+str(B[0]))
+
+SSE=0
+SE=0
+SElist=[]
+for i in range(len(sud)):
+    SE+=sud[i]-(B[1]*soap[i]+B[0])
+    SSE+=(sud[i]-(B[1]*soap[i]+B[0]))**2 
+    SElist.append(SE**2)
+print("Sum of errors: "+str(SE)+"\nSSE: "+str(SSE))
+
+Ybar = np.mean(Y)
+print("\nMean (Ybar): "+str(Ybar))
+
+S=0
+for i in sud:
+    S+=i-Ybar
+print("Sum of Yi-Ybar: "+str(S))
+
+SST=0
+for i in sud:
+    SST+=(i-Ybar)**2
+print("SST: "+str(SST))
+
+SSR=SST-SSE
+print("SSR: "+str(SSR))
+print("Print squared errors :",SElist)
+ax.plot3D(soap,sud,SElist, 'red')
+# ax.scatter3D(soap,sud,SElist,cmap='Greens');
