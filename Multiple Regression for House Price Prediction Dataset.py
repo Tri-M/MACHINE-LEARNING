@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 # In[47]:
 
 
-df=pd.read_csv('Z:\Z-drive\sem5\MLlab\Dataset\House.csv')
+df=pd.read_csv('data.csv')
 
 
 # In[48]:
