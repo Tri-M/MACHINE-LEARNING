@@ -13,6 +13,7 @@ sqft_abv=df['sqft_above']
 sqft_bse=df['sqft_basement']
 view=df['view']
 cond=df['condition']
+waterfront=df['waterfront']
 
 ax[0,0].scatter(bedr,price,color='c')
 ax[0, 0].set_title("bedroom v/s price")
@@ -41,6 +42,9 @@ ax[2,0].set_title("view v/s price")
 
 ax[2,1].scatter(cond,price,color='y')
 ax[2,1].set_title("condition v/s price")
+
+ax[2,2].scatter(waterfront,price,color='b')
+ax[2,2].set_title("waterfront v/s price")
 
 fig.tight_layout() 
 plt.show()
@@ -126,6 +130,10 @@ print("________________________________________________")
 print("\nLinear Regression using Bedrooms ")
 print("\n")
 LinReg(bedr)
+print("________________________________________________")
+print("\nLinear Regression using floors ")
+print("\n")
+LinReg(flr)
 print("________________________________________________")
 
     
