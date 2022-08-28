@@ -100,7 +100,7 @@ def LinReg(ar):
     SE=0
     for i in range(len(price)):
         SE+=sqft[i]-(B[1]*sqft[i]+B[0])
-        SSE+=(price[i]-(B[1]*ar[i]+B[0]))**2 #Quantify the error
+        SSE+=(price[i]-(B[1]*ar[i]+B[0]))**2   #sum of squared error
     print("Errors sum: "+str(SE)+"\nSSE: "+str(SSE))
     
     Y_ = np.mean(Y)
@@ -118,6 +118,10 @@ def LinReg(ar):
     
     SSR=SST-SSE
     print("SSR: "+str(SSR))
+
+
+    R2=SSR/SST
+    print("R2: "+str(R2))
 print("\n")
 print("\nLinear regression using sqft")
 print("\n")
