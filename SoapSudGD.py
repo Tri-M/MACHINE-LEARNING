@@ -3,7 +3,7 @@ import numpy as np
 x=soap=[4, 4.5, 5, 5.5, 6, 6.5, 7]
 y=Y=sud=[33, 42, 45, 51, 53, 61, 62]
 
-# p=plt.scatter(soap,sud)
+
 ax = plt.axes(projection='3d')
 
 ct=0
@@ -17,7 +17,6 @@ eta=0.001
 while True:
     s1=0
     s2=0
-   
     for i in range(7):
         s1+=(y[i]-(b0+b1*x[i]))
         s2+=(x[i]*(y[i]-(b0+b1*x[i])))
