@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Multiple Regression for House Price Prediction Dataset
+
+# In[46]:
+
 
 import numpy as np
 import pandas as pd
@@ -5,40 +12,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-# In[47]:
-
-
 df=pd.read_csv('data.csv')
 
-
-# In[48]:
-
-
 df.describe()
-
-
-# In[49]:
-
-
 dfTrain=df.head(int(len(df)*2/3))
 dfTest=df.tail(int(len(df)/3))
-
-
-# In[64]:
-
-
 corr = dfTrain.corr()
 print(corr)
-
-
-# In[51]:
-
-
-# ind=['sqft_lot','floors','bedrooms','sqft_above','sqft_basement','condition']
 ind=['sqft_lot','floors','bedrooms','sqft_above','sqft_basement','waterfront','view','yr_built','yr_renovated','condition']
 
-
-# In[52]:
 
 
 x=[]
@@ -59,16 +41,10 @@ XtY=Xt.dot(Y)
 W=XtXi.dot(XtY)
 
 
-# In[53]:
 
 
 for i in range(len(W)):
     print("w"+str(i)+" : "+str(W[i]))
-
-
-# # Avg performance measures
-
-# In[54]:
 
 
 Ypred = []
@@ -79,7 +55,6 @@ for i in range(len(dfTrain)):
     Ypred.append(sum)
 
 
-# In[55]:
 
 
 SSE=0
@@ -96,7 +71,7 @@ Rsq=SSR/SST
 AdjRsq=1-((1-Rsq)*(len(X)-1)/(len(X)-len(ind)-1))
 
 
-# In[56]:
+
 
 
 print("SSR : ",SSR)
@@ -106,8 +81,6 @@ print("Rsq : ",Rsq)
 print("AdRq: ",AdjRsq)
 
 
-# In[57]:
-
 
 x1=[]
 for i in range(len(X)):
@@ -115,16 +88,8 @@ for i in range(len(X)):
 print(plt.scatter(x1,Y))
 
 
-# # Testing set
-
-# In[58]:
-
 
 dfTest.head()
-
-
-# In[59]:
-
 
 price=[]
 for i in range(len(dfTest)):
@@ -134,16 +99,23 @@ for i in range(len(dfTest)):
     price.append(sum)
 
 
-# In[60]:
-
 
 Y=[]
 for i in range(len(dfTest)):
     Y.append(dfTest['price'][i+3067])
 
 
-# In[63]:
 
 
 for i in range(len(Y)):
+<<<<<<< HEAD
     print(str(Y[i])+"\t"+str(price[i]))
+=======
+    print(str(Y[i])+"\t"+str(price[i]))
+
+
+# In[ ]:
+
+
+
+
