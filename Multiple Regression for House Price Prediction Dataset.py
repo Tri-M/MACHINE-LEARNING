@@ -108,9 +108,9 @@ for i in range(len(dfTest)):
 
 
 for i in range(len(Y)):
-<<<<<<< HEAD
+
     print(str(Y[i])+"\t"+str(price[i]))
-=======
+
     print(str(Y[i])+"\t"+str(price[i]))
 
 
