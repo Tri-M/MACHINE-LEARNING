@@ -67,7 +67,6 @@ print("Rsq : ",Rsq)
 print("AdRq: ",AdjRsq)
 
 
-
 x1=[]
 for i in range(len(X)):
     x1.append(x[i][1])
