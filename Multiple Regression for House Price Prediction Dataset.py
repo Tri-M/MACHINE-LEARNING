@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Multiple Regression for House Price Prediction Dataset
-
-# In[46]:
-
-
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -68,9 +60,6 @@ Rsq=SSR/SST
 AdjRsq=1-((1-Rsq)*(len(X)-1)/(len(X)-len(ind)-1))
 
 
-
-
-
 print("SSR : ",SSR)
 print("SSE : ",SSE)
 print("SST : ",SST)
@@ -102,8 +91,6 @@ for i in range(len(dfTest)):
     Y.append(dfTest['price'][i+3067])
 
 
-
-
 for i in range(len(Y)):
 
     print(str(Y[i])+"\t"+str(price[i]))
@@ -111,7 +98,6 @@ for i in range(len(Y)):
     print(str(Y[i])+"\t"+str(price[i]))
 
 
-# In[ ]:
 
 
 
