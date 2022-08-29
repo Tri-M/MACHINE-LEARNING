@@ -40,9 +40,6 @@ XtXi=np.linalg.inv(XtX)
 XtY=Xt.dot(Y)
 W=XtXi.dot(XtY)
 
-
-
-
 for i in range(len(W)):
     print("w"+str(i)+" : "+str(W[i]))
 
