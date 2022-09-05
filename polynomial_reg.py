@@ -1,95 +1,151 @@
 import pandas as pd
 import numpy as np
-import sys
+import matplotlib.pyplot as plt
 
-df = pd.read_csv('iris.csv')
-
-def calcB(X, Y, degree):
-    xmat = []
-    for i in range(degree+1):
-        lis = []
-        for j in X:
-            if i==0:
-                lis.append(1)
-            else:
-                lis.append(j**i)
-        xmat.append(lis)
-    xT = np.array(xmat)
-    y = np.array(Y)
-    x = xT.transpose()
-    xTx = np.dot(xT, x)
-    xTxI = np.linalg.inv(xTx)
-    xTy = np.dot(xT, y)
-    B = np.dot(xTxI, xTy)
-    
+def polynomial_regression(X, Y, d):
+    B = np.linalg.inv(X.transpose().dot(X)).dot(X.transpose().dot(Y))
     return B
 
-def calcMetrics(B, X, Y):
-    result = []
-    Ymean = np.mean(np.array(Y))
+def preparePlot(x, y, B, title=""):
+    plt.scatter(x, y)
     
-    SSE, SSR, SST = 0, 0, 0
+    X = np.array([[i**p for p in range(d+1)] for i in np.linspace(0, 10, 100)])
     
-    for j in range(len(X)):
-        Yhat = 0
-        for i in range(len(B)):
-            if i==0:
-                Yhat += B[i]
-            else:
-                Yhat += B[i]*X[j]**i
-        SSE += (Yhat-Y[j])**2
-        SST += (Y[j]-Ymean)**2
-        SSR += (Yhat-Ymean)**2
-    result.append(SSE)
-    result.append(SSR)
-    result.append(SST)
-    result.append(SSR/SST)
-    result.append((SSR/SST)**0.5)
-    return result
+    Ycap = X.dot(B)
+    
+    plt.plot(np.linspace(0, 10, 100), Ycap, color="red")
+    plt.xlabel(cols[i])
+    plt.ylabel(cols[j])
+    plt.title(title)
+    plt.show()
+    
+def calcSSE(X, Y, B):
+    n = len(Y)
+
+    Ycap = X.dot(B)
+    error = Y - Ycap
+    
+    sse = 0
+    for i in range(n):
+        sse += error[i][0]**2
+    return sse
+
+def calcSSR(X, Y, B):
+    n = len(Y)
+    
+    ybar = np.mean(Y)
+    Ycap = X.dot(B)
+    
+    ssr=0
+    for i in range(n):
+        ssr += (Ycap[i][0]-ybar)**2
+    return ssr
+
+
+def evaluate(X, Y, B):
+    sse = calcSSE(X, Y, B)
+    ssr = calcSSR(X, Y, B)
+    r2 = ssr/(ssr+sse)
+    return (sse, ssr, r2)
+
+
+#execution starts here
+data = pd.read_csv("iris.csv")
+cols = list(data.columns)
+print(cols)
+
+
+max_r2= 0
+optimum_model = ""
+
+for d in range(1, 4):
+    print("------------------------------\nd=", d)
+    for i in range(0, 4):
+        for j in range(i+1, 4):
             
-def display(X, Y):
-    result = []
-    for i in range(1, 4):
-        B = calcB(X, Y, i)    
-        result.append(calcMetrics(B, X, Y))
-        print("\nDegree", i)
-        print("SSE: ", result[i-1][0])
-        print("SSR: ", result[i-1][1])
-        print("SST: ", result[i-1][2])
-        print("r^2: ", result[i-1][3])
-        print("r: ", result[i-1][4])
-    return result
+            title = cols[i]+ "  VS  "+ cols[j] + " with d=" + str(d)
+            print("\n\n", title)
+            
+            x = data[cols[i]].tolist()
+            y = data[cols[j]].tolist()
+            
+            X = np.array([[i**p for p in range(d+1)] for i in x])
+            Y = np.array([[i] for i in y])
+            
+            B = polynomial_regression(X, Y, d)
+            print(B)
+            sse, ssr, r2 = evaluate(X, Y, B)
+            
+            print("[SSE]: ", sse)
+            print("[SSR]: ", ssr)
+            print("[SST]: ", sse + ssr)
+            print("[r^2]: ", r2)
+            
+            
+            
+            
+            if r2> max_r2:
+                max_r2 = r2
+                optimum_model = title  
+            
+            preparePlot(x, y, B, title)
+            
+            
+print("---------------------------------\n[The optimum model]: ", optimum_model)
 
-petalLength = df['petallength']
-petalWidth = df['petalwidth']
-sepalLength = df['sepallength']
-sepalWidth = df['sepalwidth']
 
-SSE = []
-degree = 2
 
-print("\nPetal Length Vs Petal Width")
-result = display(petalLength, petalWidth)
-SSE.append(result[degree-1][0])
 
-print("\nPetal Length Vs Sepal Length")
-result = display(petalLength, sepalLength)
-SSE.append(result[degree-1][0])
+# import pandas as py
+# import numpy as np
+# import matplotlib.pyplot as plt
 
-print("\nPetal Length Vs Sepal Width")
-result = display(petalLength, sepalWidth)
-SSE.append(result[degree-1][0])
 
-print("\nSepal Length Vs Sepal Width")
-result = display(sepalLength, sepalWidth)
-SSE.append(result[degree-1][0])
+# def poly(X, Y, d):
+#     plt.scatter(X, Y)
+#     # plt.show()
+#     n = len(X)
+#     matrix = np.array([[i ** p for p in range(d + 1)] for i in X])
+#     y = np.array([[i] for i in Y])
 
-print("\nPetal Width Vs Sepal Width")
-result = display(petalWidth, sepalWidth)
-SSE.append(result[degree-1][0])
+#     xt = np.transpose(matrix)
+#     xm = (np.dot(xt, matrix))
+#     # print(xm)
+#     xi = (np.linalg.inv(xm))
+#     # print(xi)
+#     ym = (np.dot(xt, y))
+#     # print(ym)
+#     b = np.dot(xi, ym)
+#     print(b)
+#     y1 = matrix.dot(b)
+#     sse = 0
+#     for i in range(0, len(y)):
+#         sse += (y[i] - y1[i]) ** 2
+#         # se+=y[i]-y1[i]
+#     print("sum of squared error", sse)
+#     mean = sum(y) / len(y)
+#     sst = 0
+#     for i in range(0, len(y)):
+#         sst += (y[i] - (mean)) ** 2
+#     print("total sum of square", sst)
+#     ssr = 0
+#     for i in range(len(y)):
+#         ssr += (y1[i] - mean) ** 2
+#     print("Regression sum of squares", ssr)
+#     print("coefficient of determination", ssr / sst)
+#     print(len(y1))
+#     X = np.array([[i ** p for p in range(d + 1)] for i in np.linspace(0, 10, 100)])
 
-print("\nPetal Width Vs Sepal Length")
-result = display(petalWidth, sepalLength)
-SSE.append(result[degree-1][0])
+#     Ycap = X.dot(b)
+#     plt.plot(np.linspace(0, 10, 100), Ycap, color="red")
+#     return (b)
 
-print("\nMinimum SSE: ", min(SSE), SSE.index(min(SSE)))
+
+# data = py.read_csv("iris.csv")
+# sl = data["SepalLengthCm"]
+# sw = data["SepalWidthCm"]s
+# pl = data["PetalLengthCm"]
+# pw = data["PetalWidthCm"]
+# print("\nSepal length vs sepal width")
+# co = poly(list(sl), list(sw), 2)
+# plt.show()
