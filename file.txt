@@ -1,6 +1,0 @@
-01318 John CSD Coimbatore 8 Yes 80
-22115 Jerome CSD Chennai 9 No 67
-73623 Daniel ECE Salem 5 Yes 0
-84944 Charles ECE Coimbatore 6 No 65
-65056 Angela IT Trichy 7 Yes 79
-rghwq

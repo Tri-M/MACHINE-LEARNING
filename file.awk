@@ -1,8 +1,0 @@
-BEGIN 
-{}
-{
-  !/aeiou/
-}
-END{
-
-}
