@@ -1,160 +1,83 @@
-import math
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
-from sklearn import preprocessing
-from sklearn.linear_model import LogisticRegression
-#from sklearn.cross_validation import train_test_split
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder, normalize
 from sklearn.model_selection import train_test_split
-from numpy import loadtxt, where
-from pylab import scatter, show, legend, xlabel, ylabel
 
+df = pd.read_csv("wcb.csv")
+df.head()
+l = LabelEncoder()
+l.fit(df['diagnosis'])
+df['diagnosis'] = l.transform(df['diagnosis'])
 
-min_max_scaler = preprocessing.MinMaxScaler(feature_range=(-1,1))
-df = pd.read_csv("data.csv", header=0)
+X = df.drop(['id', 'diagnosis', 'Unnamed: 32'], axis=1)
+Y = df['diagnosis'].values
+Xnames = X.columns
+#X is normalized
+# X = pd.DataFrame(normalize(X.values), columns = Xnames)
 
-# clean up data
-df.columns = ["grade1","grade2","label"]
+final_features = [x for x in Xnames]
+p = df[Xnames].corr().values.tolist()
+for i in range(len(p)):
+    for j in range(i+1, len(p)):
+        if abs(p[i][j]) > 0.7 and Xnames[i] in final_features:
+            final_features.remove(Xnames[i])
+print("\n\nFeatures before removing multicollinearity: ", Xnames)
+print("\n\nFeatures after removing multicollinearity:\n", final_features)
 
-x = df["label"].map(lambda x: float(x.rstrip(';')))
+def outlier_treatment(df, feature):
+    q1, q3 = np.percentile(df[feature], [25, 75])
+    IQR = q3 - q1 
+    lower_range = q1 - (3 * IQR) 
+    upper_range = q3 + (3 * IQR)
+    to_drop = df[(df[feature]<lower_range)|(df[feature]>upper_range)]
+    df.drop(to_drop.index, inplace=True)
 
-# formats the input data into two arrays, one of independant variables
-# and one of the dependant variable
-X = df[["grade1","grade2"]]
-X = np.array(X)
-X = min_max_scaler.fit_transform(X)
-Y = df["label"].map(lambda x: float(x.rstrip(';')))
-Y = np.array(Y)
+outlier_treatment(df, 'diagnosis')
 
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
-# if want to create a new clean dataset 
-##X = pd.DataFrame.from_records(X,columns=['grade1','grade2'])
-##X.insert(2,'label',Y)
-##X.to_csv('data2.csv')
+def sigmoid(Z):
+    Z = np.array(Z, dtype='float64')
+    return 1/(1 + np.exp(-Z))
 
-# creating testing and training set
-X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.33)
+def logisticRegression(X, Y, learningRate, iterations):
+    X = np.vstack((np.ones((X.shape[0],)), X.T)).T
+    wT=np.zeros((X.shape[1], 1)).T
+    costs = []
+    for i in range(iterations):
+        wTx = np.dot(wT, X.T)
+        A = sigmoid(wTx)
+        wPred = np.array([1 if x >= 0.5 else 0 for x in A[0]])
+        costs.append(np.sum(np.square(wPred - Y)))
+#         dW = np.dot(X.T, (wPred - Y)) / (Y.size) 
+#         dW = 
+        wT = wT - learningRate * dW
+    return wT, np.array(costs)
 
-# train scikit learn model 
-clf = LogisticRegression()
-clf.fit(X_train,Y_train)
-print ('score Scikit learn: ', clf.score(X_test,Y_test))
+W, costs = logisticRegression(X_train, Y_train, 0.00001,100000)
+W
+plt.plot(costs)
+def predict(X, Y, W):
+    X = np.vstack((np.ones((X.shape[0],)), X.T)).T
+    wTx = np.dot(W, X.T)
+    A = sigmoid(wTx)
+    wPred = np.array([1 if x >= 0.5 else 0 for x in A[0]])
+    print("Accuracy: ", np.sum(wPred == Y)/Y.size)
+    print("Precision for 0: ", np.sum(wPred == 0)/np.sum(Y == 0))
+    print("Precision for 1: ", np.sum(wPred == 1)/np.sum(Y == 1))    
+    return wPred
+dP = predict(X_test, Y_test, W)
+def parseDiagnosis(x):
+    return np.array(["Malignant" if i == 0 else "Benign" for i in x])
+parsedDiagnosisPred = parseDiagnosis(diagnosisPred)
 
-# visualize data, uncomment "show()" to run it
-pos = where(Y == 1)
-neg = where(Y == 0)
-scatter(X[pos, 0], X[pos, 1], marker='o', c='b')
-scatter(X[neg, 0], X[neg, 1], marker='x', c='r')
-xlabel('Exam 1 score')
-ylabel('Exam 2 score')
-legend(['Not Admitted', 'Admitted'])
-show()
+print(pd.DataFrame(diagnosisPred).value_counts())
+print(pd.DataFrame(Y_test).value_counts())
+print (Y_test)
+print(dP)
 
-##The sigmoid function adjusts the cost function hypotheses to adjust the algorithm proportionally for worse estimations
-def Sigmoid(z):
-	G_of_Z = float(1.0 / float((1.0 + math.exp(-1.0*z))))
-	return G_of_Z 
+z = sum([1 for i in range(len(dP)) if Y_test[i] == dP[i]])
 
-##The hypothesis is the linear combination of all the known factors x[i] and their current estimated coefficients theta[i] 
-##This hypothesis will be used to calculate each instance of the Cost Function
-def Hypothesis(theta, x):
-	z = 0
-	for i in xrange(len(theta)):
-		z += x[i]*theta[i]
-	return Sigmoid(z)
-
-##For each member of the dataset, the result (Y) determines which variation of the cost function is used
-##The Y = 0 cost function punishes high probability estimations, and the Y = 1 it punishes low scores
-##The "punishment" makes the change in the gradient of ThetaCurrent - Average(CostFunction(Dataset)) greater
-def Cost_Function(X,Y,theta,m):
-	sumOfErrors = 0
-	for i in xrange(m):
-		xi = X[i]
-		hi = Hypothesis(theta,xi)
-		if Y[i] == 1:
-			error = Y[i] * math.log(hi)
-		elif Y[i] == 0:
-			error = (1-Y[i]) * math.log(1-hi)
-		sumOfErrors += error
-	const = -1/m
-	J = const * sumOfErrors
-	print ('cost is ', J )
-	return J
-
-##This function creates the gradient component for each Theta value 
-##The gradient is the partial derivative by Theta of the current value of theta minus 
-##a "learning speed factor aplha" times the average of all the cost functions for that theta
-##For each Theta there is a cost function calculated for each member of the dataset
-def Cost_Function_Derivative(X,Y,theta,j,m,alpha):
-	sumErrors = 0
-	for i in xrange(m):
-		xi = X[i]
-		xij = xi[j]
-		hi = Hypothesis(theta,X[i])
-		error = (hi - Y[i])*xij
-		sumErrors += error
-	m = len(Y)
-	constant = float(alpha)/float(m)
-	J = constant * sumErrors
-	return J
-
-##For each theta, the partial differential 
-##The gradient, or vector from the current point in Theta-space (each theta value is its own dimension) to the more accurate point, 
-##is the vector with each dimensional component being the partial differential for each theta value
-def Gradient_Descent(X,Y,theta,m,alpha):
-	new_theta = []
-	constant = alpha/m
-	for j in xrange(len(theta)):
-		CFDerivative = Cost_Function_Derivative(X,Y,theta,j,m,alpha)
-		new_theta_value = theta[j] - CFDerivative
-		new_theta.append(new_theta_value)
-	return new_theta
-
-##The high level function for the LR algorithm which, for a number of steps (num_iters) finds gradients which take 
-##the Theta values (coefficients of known factors) from an estimation closer (new_theta) to their "optimum estimation" which is the
-##set of values best representing the system in a linear combination model
-def Logistic_Regression(X,Y,alpha,theta,num_iters):
-	m = len(Y)
-	for x in xrange(num_iters):
-		new_theta = Gradient_Descent(X,Y,theta,m,alpha)
-		theta = new_theta
-		if x % 100 == 0:
-			#here the cost function is used to present the final hypothesis of the model in the same form for each gradient-step iteration
-			Cost_Function(X,Y,theta,m)
-			print ('theta ', theta)	
-			print ('cost is ', Cost_Function(X,Y,theta,m))
-	Declare_Winner(theta)
-
-##This method compares the accuracy of the model generated by the scikit library with the model generated by this implementation
-def Declare_Winner(theta):
-    score = 0
-    winner = ""
-    #first scikit LR is tested for each independent var in the dataset and its prediction is compared against the dependent var
-    #if the prediction is the same as the dataset measured value it counts as a point for thie scikit version of LR
-    scikit_score = clf.score(X_test,Y_test)
-    length = len(X_test)
-    for i in xrange(length):
-        prediction = round(Hypothesis(X_test[i],theta))
-        answer = Y_test[i]
-        if prediction == answer:
-            score += 1
-    #the same process is repeated for the implementation from this module and the scores compared to find the higher match-rate
-    my_score = float(score) / float(length)
-    if my_score > scikit_score:
-        print ('You won!')
-    elif my_score == scikit_score:
-        print ('Its a tie!')
-    else:
-        print( 'Scikit won.. :(')
-    print ('Your score: ', my_score)
-    print ('Scikits score: ', scikit_score )
-
-# These are the initial guesses for theta as well as the learning rate of the algorithm
-# A learning rate too low will not close in on the most accurate values within a reasonable number of iterations
-# An alpha too high might overshoot the accurate values or cause irratic guesses
-# Each iteration increases model accuracy but with diminishing returns, 
-# and takes a signficicant coefficient times O(n)*|Theta|, n = dataset length
-initial_theta = [0,0]
-alpha = 0.1
-iterations = 1000
-##Logistic_Regression(X,Y,alpha,initial_theta,iterations)
+dP == Y_test
+len(dP)
