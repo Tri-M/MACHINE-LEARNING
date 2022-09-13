@@ -4,13 +4,15 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, normalize
 from sklearn.model_selection import train_test_split
 
-df = pd.read_csv("wcb.csv")
+df = pd.read_csv("bc.csv")
 df.head()
+# print(df.kurt())
 l = LabelEncoder()
 l.fit(df['diagnosis'])
 df['diagnosis'] = l.transform(df['diagnosis'])
+# print(df)
 
-X = df.drop(['id', 'diagnosis', 'Unnamed: 32'], axis=1)
+X = df.drop(['id', 'diagnosis'], axis=1)
 Y = df['diagnosis'].values
 Xnames = X.columns
 #X is normalized
@@ -28,8 +30,8 @@ print("\n\nFeatures after removing multicollinearity:\n", final_features)
 def outlier_treatment(df, feature):
     q1, q3 = np.percentile(df[feature], [25, 75])
     IQR = q3 - q1 
-    lower_range = q1 - (3 * IQR) 
-    upper_range = q3 + (3 * IQR)
+    lower_range = q1 - (1.5 * IQR) 
+    upper_range = q3 + (1.5 * IQR)
     to_drop = df[(df[feature]<lower_range)|(df[feature]>upper_range)]
     df.drop(to_drop.index, inplace=True)
 
@@ -50,14 +52,14 @@ def logisticRegression(X, Y, learningRate, iterations):
         A = sigmoid(wTx)
         wPred = np.array([1 if x >= 0.5 else 0 for x in A[0]])
         costs.append(np.sum(np.square(wPred - Y)))
-#         dW = np.dot(X.T, (wPred - Y)) / (Y.size) 
-#         dW = 
+        dW = np.dot(X.T, (wPred - Y)) / (Y.size) 
         wT = wT - learningRate * dW
     return wT, np.array(costs)
 
 W, costs = logisticRegression(X_train, Y_train, 0.00001,100000)
-W
+print(W)
 plt.plot(costs)
+
 def predict(X, Y, W):
     X = np.vstack((np.ones((X.shape[0],)), X.T)).T
     wTx = np.dot(W, X.T)
@@ -70,14 +72,3 @@ def predict(X, Y, W):
 dP = predict(X_test, Y_test, W)
 def parseDiagnosis(x):
     return np.array(["Malignant" if i == 0 else "Benign" for i in x])
-parsedDiagnosisPred = parseDiagnosis(diagnosisPred)
-
-print(pd.DataFrame(diagnosisPred).value_counts())
-print(pd.DataFrame(Y_test).value_counts())
-print (Y_test)
-print(dP)
-
-z = sum([1 for i in range(len(dP)) if Y_test[i] == dP[i]])
-
-dP == Y_test
-len(dP)
