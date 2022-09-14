@@ -5,27 +5,29 @@ from sklearn.preprocessing import LabelEncoder, normalize
 from sklearn.model_selection import train_test_split
 
 df = pd.read_csv("bc.csv")
-df.head()
-# print(df.kurt())
-l = LabelEncoder()
-l.fit(df['diagnosis'])
-df['diagnosis'] = l.transform(df['diagnosis'])
-# print(df)
+def getCols(df):
+    l = LabelEncoder()
+    l.fit(df['diagnosis'])
+    df['diagnosis'] = l.transform(df['diagnosis'])
+    X = df.drop(['id', 'diagnosis'], axis=1)
+    Y = df['diagnosis'].values
+    return X,Y
 
 X = df.drop(['id', 'diagnosis'], axis=1)
 Y = df['diagnosis'].values
 Xnames = X.columns
-#X is normalized
-# X = pd.DataFrame(normalize(X.values), columns = Xnames)
 
-final_features = [x for x in Xnames]
-p = df[Xnames].corr().values.tolist()
-for i in range(len(p)):
-    for j in range(i+1, len(p)):
-        if abs(p[i][j]) > 0.7 and Xnames[i] in final_features:
-            final_features.remove(Xnames[i])
-print("\n\nFeatures before removing multicollinearity: ", Xnames)
-print("\n\nFeatures after removing multicollinearity:\n", final_features)
+
+def removeMulticollinearity(X,Y):
+    final_features = [x for x in Xnames]
+    p = df[Xnames].corr().values.tolist()
+    for i in range(len(p)):
+        for j in range(i+1, len(p)):
+            if abs(p[i][j]) > 0.7 and Xnames[i] in final_features:
+                final_features.remove(Xnames[i])
+                print("\n\nFeatures before removing multicollinearity: ", Xnames)
+                print("\n\nFeatures after removing multicollinearity:\n", final_features)
+    return final_features
 
 def outlier_treatment(df, feature):
     q1, q3 = np.percentile(df[feature], [25, 75])
@@ -34,8 +36,15 @@ def outlier_treatment(df, feature):
     upper_range = q3 + (1.5 * IQR)
     to_drop = df[(df[feature]<lower_range)|(df[feature]>upper_range)]
     df.drop(to_drop.index, inplace=True)
+df = pd.read_csv("bc.csv")
+print(df.describe())
+X,Y=getCols(df)
 
-outlier_treatment(df, 'diagnosis')
+final_features=removeMulticollinearity(X, Y)
+for i in final_features:
+    outlier_treatment(df, i)
+# for i in final_features:
+#     df.boxplot(by = ['diagnosis'], column =i, grid = False)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
@@ -44,12 +53,15 @@ def sigmoid(Z):
     return 1/(1 + np.exp(-Z))
 
 def logisticRegression(X, Y, learningRate, iterations):
+    print(X)
     X = np.vstack((np.ones((X.shape[0],)), X.T)).T
+    print("After :",X)
     wT=np.zeros((X.shape[1], 1)).T
     costs = []
     for i in range(iterations):
         wTx = np.dot(wT, X.T)
         A = sigmoid(wTx)
+        # print("A : ",A)
         wPred = np.array([1 if x >= 0.5 else 0 for x in A[0]])
         costs.append(np.sum(np.square(wPred - Y)))
         dW = np.dot(X.T, (wPred - Y)) / (Y.size) 
@@ -59,7 +71,7 @@ def logisticRegression(X, Y, learningRate, iterations):
 W, costs = logisticRegression(X_train, Y_train, 0.00001,100000)
 print(W)
 plt.plot(costs)
-
+# print("X.shape[0]",X.shape[0])
 def predict(X, Y, W):
     X = np.vstack((np.ones((X.shape[0],)), X.T)).T
     wTx = np.dot(W, X.T)
