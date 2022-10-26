@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 
 iris=pd.read_csv("Iris.csv")
 print(iris)
-x = iris.iloc[:, [1,2,3,4]].values
+x = iris.iloc[:, [0,1,2,3]].values
 print(x)
 
 print(iris.info())
@@ -19,7 +19,7 @@ iris_virginica=iris.loc[iris["Species"]=="Iris-virginica"]
 iris_versicolor=iris.loc[iris["Species"]=="Iris-versicolor"]
 
 
-for i in range(1, 11):
+for i in range(1, 3):
     kmeans = KMeans(n_clusters = i, init = 'k-means++', max_iter = 300, n_init = 10, random_state = 0)
     kmeans.fit(x)
   
