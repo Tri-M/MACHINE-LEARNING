@@ -10,7 +10,8 @@ from sklearn.cluster import KMeans
 
 iris=pd.read_csv("Iris.csv")
 print(iris)
-x = iris.iloc[:, [0, 1, 2, 3]].values
+x = iris.iloc[:, [1,2,3,4]].values
+print(x)
 
 print(iris.info())
 iris_setosa=iris.loc[iris["Species"]=="Iris-setosa"]
