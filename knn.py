@@ -24,7 +24,7 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_
 model = KNeighborsClassifier(n_neighbors=3)
 model.fit(x_train, y_train)
 predict = model.predict(x_test)
-accuracy_score(predict,y_test)
+accuracy_score=accuracy_score(predict,y_test)
 print(accuracy_score)
 accuracy=model.score(x_train,y_train)
 print(accuracy)
@@ -39,4 +39,3 @@ model.fit(x_train,y_train)
 predict=model.predict(x_test)
 acc = model.score(x_test,y_test)
 print(acc)
-
