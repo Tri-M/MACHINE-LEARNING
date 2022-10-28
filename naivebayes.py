@@ -20,6 +20,7 @@ from sklearn.preprocessing import LabelEncoder, normalize
 # 11. Class: (2 for benign, 4 for malignant)
 
 dataset = pd.read_csv("bcoriginal.csv")
+print(dataset)
 dataset = dataset.drop(["id"], axis = 1)
 print(dataset)
 M = dataset[dataset.c10 == 4]
